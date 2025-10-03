@@ -7,6 +7,101 @@ import static org.hamcrest.Matchers.*;
 
 @TestMethodOrder(MethodOrderer.Random.class)
 public class todosExtraEndpoint extends com.ecse429.restapi.BaseApiTest {
+        @Test
+        @Order(6)
+        void testPostMalformedJsonReturns400() {
+                given()
+                        .contentType(ContentType.JSON)
+                        .accept(ContentType.JSON)
+                        .body("{\"title\":\"MissingEndQuote}") // malformed JSON
+                .when()
+                        .post("/todos")
+                .then()
+                        .statusCode(400);
+        }
+
+        @Test
+        @Order(7)
+        void testPostWithIdIncludedReturns400() {
+                given()
+                        .contentType(ContentType.JSON)
+                        .accept(ContentType.JSON)
+                        .body("{\"id\":123,\"title\":\"ShouldFail\"}")
+                .when()
+                        .post("/todos")
+                .then()
+                        .statusCode(400);
+        }
+
+        @Test
+        @Order(8)
+        void testUnsupportedMethodReturns405() {
+                given()
+                        .contentType(ContentType.JSON)
+                        .accept(ContentType.JSON)
+                .when()
+                        .patch("/todos")
+                .then()
+                        .statusCode(405);
+        }
+
+        @Test
+        @Order(9)
+        void testPostIncreasesCountByOne() {
+                int before = given().accept(ContentType.JSON).when().get("/todos").then().extract().path("todos.size()");
+                String idString = given()
+                        .contentType(ContentType.JSON)
+                        .accept(ContentType.JSON)
+                        .body("{\"title\":\"CountTest\"}")
+                .when()
+                        .post("/todos")
+                .then()
+                        .statusCode(201)
+                        .extract().path("id");
+                int after = given().accept(ContentType.JSON).when().get("/todos").then().extract().path("todos.size()");
+                Assertions.assertEquals(before + 1, after);
+                // Clean up
+                given().when().delete("/todos/" + idString).then().statusCode(200);
+        }
+
+        @Test
+        @Order(10)
+        void testDeleteOnlyDeletesThatTodo() {
+                // Create two todos
+                String id1 = given().contentType(ContentType.JSON).accept(ContentType.JSON).body("{\"title\":\"Del1\"}").when().post("/todos").then().statusCode(201).extract().path("id");
+                String id2 = given().contentType(ContentType.JSON).accept(ContentType.JSON).body("{\"title\":\"Del2\"}").when().post("/todos").then().statusCode(201).extract().path("id");
+                // Delete id1
+                given().when().delete("/todos/" + id1).then().statusCode(200);
+                // id2 should still exist
+                given().accept(ContentType.JSON).when().get("/todos/" + id2).then().statusCode(200);
+                // Clean up
+                given().when().delete("/todos/" + id2).then().statusCode(200);
+        }
+
+        @Test
+        @Order(11)
+        void testSystemHealthFailsIfServiceDown() {
+                try {
+                        given().accept(ContentType.JSON).when().get("/todos").then().statusCode(200);
+                } catch (Exception e) {
+                        Assertions.fail("Service is not running or not reachable");
+                }
+        }
+
+
+        @Test
+        @Order(13)
+        void testActualBehaviorPasses() {
+                // Example: Actual behavior is 201 for empty body
+                given()
+                        .contentType(ContentType.JSON)
+                        .accept(ContentType.JSON)
+                        .body("")
+                .when()
+                        .post("/todos")
+                .then()
+                        .statusCode(anyOf(is(201), is(400)));
+        }
 
     @Test
     @Order(1)

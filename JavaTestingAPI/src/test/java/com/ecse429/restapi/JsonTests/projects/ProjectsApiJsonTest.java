@@ -10,6 +10,101 @@ import com.ecse429.restapi.BaseApiTest;
 
 @TestMethodOrder(MethodOrderer.Random.class)
 public class ProjectsApiJsonTest extends BaseApiTest {
+    @Test
+    @Order(20)
+    void testPostMalformedJsonReturns400() {
+        given()
+            .contentType(ContentType.JSON)
+            .accept(ContentType.JSON)
+            .body("{\"title\":\"MissingEndQuote}") // malformed JSON
+        .when()
+            .post("/projects")
+        .then()
+            .statusCode(400);
+    }
+
+    @Test
+    @Order(21)
+    void testPostWithIdIncludedReturns400() {
+        given()
+            .contentType(ContentType.JSON)
+            .accept(ContentType.JSON)
+            .body("{\"id\":123,\"title\":\"ShouldFail\"}")
+        .when()
+            .post("/projects")
+        .then()
+            .statusCode(400);
+    }
+
+    @Test
+    @Order(22)
+    void testUnsupportedMethodReturns405() {
+        given()
+            .contentType(ContentType.JSON)
+            .accept(ContentType.JSON)
+        .when()
+            .patch("/projects")
+        .then()
+            .statusCode(405);
+    }
+
+    @Test
+    @Order(23)
+    void testPostIncreasesCountByOne() {
+        int before = given().accept(ContentType.JSON).when().get("/projects").then().extract().path("projects.size()");
+        String idString = given()
+            .contentType(ContentType.JSON)
+            .accept(ContentType.JSON)
+            .body("{\"title\":\"CountTest\"}")
+        .when()
+            .post("/projects")
+        .then()
+            .statusCode(anyOf(is(200), is(201)))
+            .extract().path("id").toString();
+        int after = given().accept(ContentType.JSON).when().get("/projects").then().extract().path("projects.size()");
+        Assertions.assertEquals(before + 1, after);
+        // Clean up
+        given().when().delete("/projects/" + idString).then().statusCode(anyOf(is(200), is(204), is(404)));
+    }
+
+    @Test
+    @Order(24)
+    void testDeleteOnlyDeletesThatProject() {
+        // Create two projects
+        String id1 = given().contentType(ContentType.JSON).accept(ContentType.JSON).body("{\"title\":\"Del1\"}").when().post("/projects").then().statusCode(anyOf(is(200), is(201))).extract().path("id").toString();
+        String id2 = given().contentType(ContentType.JSON).accept(ContentType.JSON).body("{\"title\":\"Del2\"}").when().post("/projects").then().statusCode(anyOf(is(200), is(201))).extract().path("id").toString();
+        // Delete id1
+        given().when().delete("/projects/" + id1).then().statusCode(anyOf(is(200), is(204), is(404)));
+        // id2 should still exist
+        given().accept(ContentType.JSON).when().get("/projects/" + id2).then().statusCode(200);
+        // Clean up
+        given().when().delete("/projects/" + id2).then().statusCode(anyOf(is(200), is(204), is(404)));
+    }
+
+    @Test
+    @Order(25)
+    void testSystemHealthFailsIfServiceDown() {
+        try {
+            given().accept(ContentType.JSON).when().get("/projects").then().statusCode(200);
+        } catch (Exception e) {
+            Assertions.fail("Service is not running or not reachable");
+        }
+    }
+
+
+    @Test
+    @Order(27)
+    void testActualBehaviorPasses() {
+        // Example: Actual behavior is 201 for empty body
+        given()
+            .contentType(ContentType.JSON)
+            .accept(ContentType.JSON)
+            .body("")
+        .when()
+            .post("/projects")
+        .then()
+            .statusCode(anyOf(is(201), is(400)));
+    }
 
 
     @Test

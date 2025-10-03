@@ -42,7 +42,6 @@ local.properties
 # Test Results
 test-output/
 *.html
-*.xml
 
 # Compiled class files
 *.class

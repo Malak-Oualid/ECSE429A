@@ -6,7 +6,7 @@ import static io.restassured.RestAssured.given;
 import static org.hamcrest.Matchers.*;
 import com.ecse429.restapi.BaseApiTest;
 
-@TestMethodOrder(MethodOrderer.OrderAnnotation.class)
+@TestMethodOrder(MethodOrderer.Random.class)
 public class CategoriesApiXmlTest extends BaseApiTest {
 
     static String createdId;

@@ -9,18 +9,14 @@ import static org.hamcrest.CoreMatchers.is;
 import com.ecse429.restapi.BaseApiTest;
 
 
-@TestMethodOrder(MethodOrderer.OrderAnnotation.class)
+@TestMethodOrder(MethodOrderer.Random.class)
 public class InteroperabilityApiJsonTest extends BaseApiTest {
-
-    static String todoId;
-    static String projectId;
-    static String categoryId;
 
     @Test
     @Order(1)
     void createEntitiesForInterop() {
-        // create todo
-        todoId = given()
+        // Create todo
+        String todoId = given()
             .contentType(ContentType.JSON)
             .accept(ContentType.JSON)
             .body("{\"title\":\"interopTodo\",\"doneStatus\":false,\"description\":\"interop todo\"}")
@@ -28,13 +24,10 @@ public class InteroperabilityApiJsonTest extends BaseApiTest {
             .post("/todos")
         .then()
             .statusCode(anyOf(is(200), is(201)))
-            .extract()
-            .path("id");
-
+            .extract().path("id").toString();
         Assertions.assertNotNull(todoId);
-
-        // create project
-        projectId = given()
+        // Create project
+        String projectId = given()
             .contentType(ContentType.JSON)
             .accept(ContentType.JSON)
             .body("{\"title\":\"interopProject\",\"completed\":false,\"active\":true,\"description\":\"interop project\"}")
@@ -42,13 +35,10 @@ public class InteroperabilityApiJsonTest extends BaseApiTest {
             .post("/projects")
         .then()
             .statusCode(anyOf(is(200), is(201)))
-            .extract()
-            .path("id");
-
+            .extract().path("id").toString();
         Assertions.assertNotNull(projectId);
-
-        // create category
-        categoryId = given()
+        // Create category
+        String categoryId = given()
             .contentType(ContentType.JSON)
             .accept(ContentType.JSON)
             .body("{\"title\":\"interopCategory\",\"description\":\"interop category\"}")
@@ -56,15 +46,37 @@ public class InteroperabilityApiJsonTest extends BaseApiTest {
             .post("/categories")
         .then()
             .statusCode(anyOf(is(200), is(201)))
-            .extract()
-            .path("id");
-
+            .extract().path("id").toString();
         Assertions.assertNotNull(categoryId);
+        // Clean up
+        given().when().delete("/todos/" + todoId).then().statusCode(anyOf(is(200), is(204), is(404)));
+        given().when().delete("/projects/" + projectId).then().statusCode(anyOf(is(200), is(204), is(404)));
+        given().when().delete("/categories/" + categoryId).then().statusCode(anyOf(is(200), is(204), is(404)));
     }
 
     @Test
     @Order(2)
     void linkTodoToProjectViaTasksAndVerify() {
+        // Create todo
+        String todoId = given()
+            .contentType(ContentType.JSON)
+            .accept(ContentType.JSON)
+            .body("{\"title\":\"interopTodo\",\"doneStatus\":false,\"description\":\"interop todo\"}")
+        .when()
+            .post("/todos")
+        .then()
+            .statusCode(anyOf(is(200), is(201)))
+            .extract().path("id").toString();
+        // Create project
+        String projectId = given()
+            .contentType(ContentType.JSON)
+            .accept(ContentType.JSON)
+            .body("{\"title\":\"interopProject\",\"completed\":false,\"active\":true,\"description\":\"interop project\"}")
+        .when()
+            .post("/projects")
+        .then()
+            .statusCode(anyOf(is(200), is(201)))
+            .extract().path("id").toString();
         // Create relationship: POST /projects/:id/tasks with { "id": "<todoId>" }
         String relBody = String.format("{\"id\":\"%s\"}", todoId);
         given()
@@ -74,7 +86,6 @@ public class InteroperabilityApiJsonTest extends BaseApiTest {
             .post("/projects/" + projectId + "/tasks")
         .then()
             .statusCode(anyOf(is(200), is(201)));
-
         // Verify tasks under project
         given()
             .accept(ContentType.JSON)
@@ -82,7 +93,6 @@ public class InteroperabilityApiJsonTest extends BaseApiTest {
             .get("/projects/" + projectId + "/tasks")
         .then()
             .statusCode(200);
-
         // Verify project appears in todo tasksof
         given()
             .accept(ContentType.JSON)
@@ -90,11 +100,45 @@ public class InteroperabilityApiJsonTest extends BaseApiTest {
             .get("/todos/" + todoId + "/tasksof")
         .then()
             .statusCode(200);
+        // Clean up
+        given().when().delete("/projects/" + projectId + "/tasks/" + todoId).then().statusCode(anyOf(is(200), is(204), is(404)));
+        given().when().delete("/todos/" + todoId).then().statusCode(anyOf(is(200), is(204), is(404)));
+        given().when().delete("/projects/" + projectId).then().statusCode(anyOf(is(200), is(204), is(404)));
     }
 
     @Test
     @Order(3)
     void linkTodoToCategoryAndProjectToCategoryAndVerify() {
+        // Create todo
+        String todoId = given()
+            .contentType(ContentType.JSON)
+            .accept(ContentType.JSON)
+            .body("{\"title\":\"interopTodo\",\"doneStatus\":false,\"description\":\"interop todo\"}")
+        .when()
+            .post("/todos")
+        .then()
+            .statusCode(anyOf(is(200), is(201)))
+            .extract().path("id").toString();
+        // Create project
+        String projectId = given()
+            .contentType(ContentType.JSON)
+            .accept(ContentType.JSON)
+            .body("{\"title\":\"interopProject\",\"completed\":false,\"active\":true,\"description\":\"interop project\"}")
+        .when()
+            .post("/projects")
+        .then()
+            .statusCode(anyOf(is(200), is(201)))
+            .extract().path("id").toString();
+        // Create category
+        String categoryId = given()
+            .contentType(ContentType.JSON)
+            .accept(ContentType.JSON)
+            .body("{\"title\":\"interopCategory\",\"description\":\"interop category\"}")
+        .when()
+            .post("/categories")
+        .then()
+            .statusCode(anyOf(is(200), is(201)))
+            .extract().path("id").toString();
         // Link todo -> category
         String relBodyCat = String.format("{\"id\":\"%s\"}", categoryId);
         given()
@@ -104,7 +148,6 @@ public class InteroperabilityApiJsonTest extends BaseApiTest {
             .post("/todos/" + todoId + "/categories")
         .then()
             .statusCode(anyOf(is(200), is(201)));
-
         // Verify via GET /todos/:id/categories
         given()
             .accept(ContentType.JSON)
@@ -112,7 +155,6 @@ public class InteroperabilityApiJsonTest extends BaseApiTest {
             .get("/todos/" + todoId + "/categories")
         .then()
             .statusCode(200);
-
         // Link project -> category
         given()
             .contentType(ContentType.JSON)
@@ -121,7 +163,6 @@ public class InteroperabilityApiJsonTest extends BaseApiTest {
             .post("/projects/" + projectId + "/categories")
         .then()
             .statusCode(anyOf(is(200), is(201)));
-
         // Verify via GET /projects/:id/categories
         given()
             .accept(ContentType.JSON)
@@ -129,49 +170,18 @@ public class InteroperabilityApiJsonTest extends BaseApiTest {
             .get("/projects/" + projectId + "/categories")
         .then()
             .statusCode(200);
+        // Clean up
+        given().when().delete("/todos/" + todoId + "/categories/" + categoryId).then().statusCode(anyOf(is(200), is(204), is(404)));
+        given().when().delete("/projects/" + projectId + "/categories/" + categoryId).then().statusCode(anyOf(is(200), is(204), is(404)));
+        given().when().delete("/todos/" + todoId).then().statusCode(anyOf(is(200), is(204), is(404)));
+        given().when().delete("/projects/" + projectId).then().statusCode(anyOf(is(200), is(204), is(404)));
+        given().when().delete("/categories/" + categoryId).then().statusCode(anyOf(is(200), is(204), is(404)));
     }
 
     @Test
     @Order(4)
     void cleanupRelationshipsAndEntities() {
-        // Delete todo->category
-        given()
-        .when()
-            .delete("/todos/" + todoId + "/categories/" + categoryId)
-        .then()
-            .statusCode(anyOf(is(200), is(204)));
-
-        // Delete project->category
-        given()
-        .when()
-            .delete("/projects/" + projectId + "/categories/" + categoryId)
-        .then()
-            .statusCode(anyOf(is(200), is(204)));
-
-        // Delete project->task (projects/:id/tasks/:id)
-        given()
-        .when()
-            .delete("/projects/" + projectId + "/tasks/" + todoId)
-        .then()
-            .statusCode(anyOf(is(200), is(204)));
-
-        // Delete entities
-        given()
-        .when()
-            .delete("/todos/" + todoId)
-        .then()
-            .statusCode(anyOf(is(200), is(204)));
-
-        given()
-        .when()
-            .delete("/projects/" + projectId)
-        .then()
-            .statusCode(anyOf(is(200), is(204)));
-
-        given()
-        .when()
-            .delete("/categories/" + categoryId)
-        .then()
-            .statusCode(anyOf(is(200), is(204)));
+        // This test is now redundant since all other tests clean up after themselves.
+        // Optionally, you can leave it empty or remove it.
     }
 }

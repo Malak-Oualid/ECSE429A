@@ -10,12 +10,23 @@ JavaTestingAPI/
 ├── src/test/java/com/ecse429/restapi/
 │   ├── BaseApiTest.java        # Base class with RestAssured setup
 │   ├── JsonTests/
+|   |   └── todos/
+|   |       ├── TodosApiJsonTest.java
+|   |   └── projects/
+|   |       ├── ProjectsApiJsonTest.java
 │   │   └── categories/
-│   │       ├── CategoriesApiTest.java                 # Basic CRUD tests
-│   │       └── CategoriesApiExpectedBehaviorTest.java # Comprehensive behavior tests
+│   │       ├── CategoriesApiJsonTest.java        
+│   │   └── interoperability/
+│   │       ├── InteroperabilityApiJsonTest.java
 │   └── XmlTests/
-│       └── categories/
-│           └── CategoriesApiXmlTest.java              # XML format tests
+|   |   └── todos/
+|   |       ├── TodosApiXmlTest.java
+|   |   └── projects/
+|   |       ├── ProjectsApiXmlTest.java
+│   │   └── categories/
+│   │       ├── CategoriesApiXmlTest.java        
+│   │   └── interoperability/
+│   │       ├── InteroperabilityApiXmlTest.java
 └── README.md
 ```
 

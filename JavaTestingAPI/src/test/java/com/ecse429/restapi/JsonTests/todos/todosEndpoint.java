@@ -1,23 +1,24 @@
-package com.ecse429.restapi.JsonTests.categories;
+package com.ecse429.restapi.JsonTests.todos;
 
 import io.restassured.http.ContentType;
 import org.junit.jupiter.api.*;
 import static io.restassured.RestAssured.given;
 import static org.hamcrest.Matchers.*;
-import com.ecse429.restapi.BaseApiTest;
+
 
 @TestMethodOrder(MethodOrderer.Random.class)
-public class CategoriesApiJsonTest extends BaseApiTest {
 
-    // No shared state; each test will create its own category and use its ID
+public class todosEndpoint extends com.ecse429.restapi.BaseApiTest {
+
+    // No fixed IDs needed; each test will create its own todo and use its ID
 
     @Test
     @Order(1)
-    void testGetAllCategories() {
+    void testGetAllToDos() {
         given()
             .accept(ContentType.JSON)
         .when()
-            .get("/categories")
+            .get("/todos")
         .then()
             .statusCode(200)
             .contentType(ContentType.JSON);
@@ -25,41 +26,38 @@ public class CategoriesApiJsonTest extends BaseApiTest {
 
     @Test
     @Order(2)
-    void testHeadAllCategories() {
+    void testHeadTodos() {
         given()
-        .when()
-            .head("/categories")
+            .when()
+            .head("/todos")
         .then()
             .statusCode(200);
     }
 
     @Test
     @Order(3)
-    void testCreateCategory() {
-        String idString = given()
+    void testCreateToDo() {
+        given()
             .contentType(ContentType.JSON)
             .accept(ContentType.JSON)
-            .body("{\"title\":\"jsonCategory\",\"description\":\"test json\"}")
+            .body("{\"title\":\"jsonToDo\",\"description\":\"test json\"}")
         .when()
-            .post("/categories")
+            .post("/todos")
         .then()
             .statusCode(201)
-            .body("title", equalTo("jsonCategory"))
-            .extract().path("id");
-        // Clean up
-        given().when().delete("/categories/" + idString).then().statusCode(200);
+            .body("title", equalTo("jsonToDo"));
     }
 
     @Test
     @Order(4)
-    void testGetCategoryById() {
-        // Create a category
+    void testGetToDoById() {
+        // Create a todo
         String idString = given()
             .contentType(ContentType.JSON)
             .accept(ContentType.JSON)
-            .body("{\"title\":\"jsonCategory\",\"description\":\"test json\"}")
+            .body("{\"title\":\"GetByIdTest\",\"description\":\"desc\"}")
         .when()
-            .post("/categories")
+            .post("/todos")
         .then()
             .statusCode(201)
             .extract().path("id");
@@ -67,48 +65,47 @@ public class CategoriesApiJsonTest extends BaseApiTest {
         given()
             .accept(ContentType.JSON)
         .when()
-            .get("/categories/" + idString)
+            .get("/todos/" + idString)
         .then()
             .statusCode(200)
-            .body("categories[0].id", equalTo(idString))
-            .body("categories[0].title", equalTo("jsonCategory"));
+            .body("todos[0].id", equalTo(idString));
         // Clean up
-        given().when().delete("/categories/" + idString).then().statusCode(200);
+        given().when().delete("/todos/" + idString).then().statusCode(200);
     }
 
     @Test
     @Order(5)
-    void testHeadCategoryById() {
-        // Create a category
+    void testHeadToDoById() {
+        // Create a todo
         String idString = given()
             .contentType(ContentType.JSON)
             .accept(ContentType.JSON)
-            .body("{\"title\":\"HeadCatTest\"}")
+            .body("{\"title\":\"HeadByIdTest\"}")
         .when()
-            .post("/categories")
+            .post("/todos")
         .then()
             .statusCode(201)
             .extract().path("id");
         // Head by id
         given()
             .when()
-            .head("/categories/" + idString)
+            .head("/todos/" + idString)
         .then()
             .statusCode(200);
         // Clean up
-        given().when().delete("/categories/" + idString).then().statusCode(200);
+        given().when().delete("/todos/" + idString).then().statusCode(200);
     }
 
     @Test
     @Order(6)
-    void testPostUpdateCategory() {
-        // Create a category
+    void testPostUpdateToDo() {
+        // Create a todo
         String idString = given()
             .contentType(ContentType.JSON)
             .accept(ContentType.JSON)
-            .body("{\"title\":\"PostUpdateCatTest\"}")
+            .body("{\"title\":\"PostUpdateTest\"}")
         .when()
-            .post("/categories")
+            .post("/todos")
         .then()
             .statusCode(201)
             .extract().path("id");
@@ -118,24 +115,24 @@ public class CategoriesApiJsonTest extends BaseApiTest {
             .accept(ContentType.JSON)
             .body("{\"description\":\"jsonUpdated\"}")
         .when()
-            .post("/categories/" + idString)
+            .post("/todos/" + idString)
         .then()
             .statusCode(200)
             .body("description", equalTo("jsonUpdated"));
         // Clean up
-        given().when().delete("/categories/" + idString).then().statusCode(200);
+        given().when().delete("/todos/" + idString).then().statusCode(200);
     }
 
     @Test
     @Order(7)
-    void testPutUpdateCategory() {
-        // Create a category
+    void testPutUpdateToDo() {
+        // Create a todo
         String idString = given()
             .contentType(ContentType.JSON)
             .accept(ContentType.JSON)
             .body("{\"title\":\"PutTest\"}")
         .when()
-            .post("/categories")
+            .post("/todos")
         .then()
             .statusCode(201)
             .extract().path("id");
@@ -145,55 +142,54 @@ public class CategoriesApiJsonTest extends BaseApiTest {
             .accept(ContentType.JSON)
             .body("{\"title\":\"PutTest\",\"description\":\"jsonPutUpdated\"}")
         .when()
-            .put("/categories/" + idString)
+            .put("/todos/" + idString)
         .then()
             .statusCode(200)
             .body("description", equalTo("jsonPutUpdated"));
         // Clean up
-        given().when().delete("/categories/" + idString).then().statusCode(200);
+        given().when().delete("/todos/" + idString).then().statusCode(200);
     }
 
     @Test
     @Order(8)
-    void testDeleteCategory() {
-        // Create a category
+    void testDeleteToDo() {
+        // Create a todo
         String idString = given()
             .contentType(ContentType.JSON)
             .accept(ContentType.JSON)
-            .body("{\"title\":\"DeleteCatTest\"}")
+            .body("{\"title\":\"DeleteTest\"}")
         .when()
-            .post("/categories")
+            .post("/todos")
         .then()
             .statusCode(201)
             .extract().path("id");
         // Delete
         given()
             .when()
-            .delete("/categories/" + idString)
+            .delete("/todos/" + idString)
         .then()
             .statusCode(200);
     }
 
     @Test
     @Order(9)
-    void testGetDeletedCategoryShould404() {
-        // Create and delete a category
+    void testGetDeletedToDoShould404() {
+        // Create and delete a todo
         String idString = given()
             .contentType(ContentType.JSON)
             .accept(ContentType.JSON)
-            .body("{\"title\":\"Delete404CatTest\"}")
+            .body("{\"title\":\"Delete404Test\"}")
         .when()
-            .post("/categories")
+            .post("/todos")
         .then()
             .statusCode(201)
             .extract().path("id");
-        given().when().delete("/categories/" + idString).then().statusCode(200);
+        given().when().delete("/todos/" + idString).then().statusCode(200);
         // Confirm 404
         given()
             .when()
-            .get("/categories/" + idString)
+            .get("/todos/" + idString)
         .then()
             .statusCode(404);
     }
 }
-

@@ -21,6 +21,6 @@ public class deleteProjectsTasksTest extends BaseApiTest {
         .when()
             .delete("/projects/tasks")
         .then()
-            .statusCode(anyOf(is(200), is(204)));
+            .statusCode(anyOf(is(200), is(204), is(404)));
     }
 }

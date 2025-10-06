@@ -15,7 +15,7 @@ import static org.hamcrest.CoreMatchers.is;
 public class deleteProjectsTasksTest extends BaseApiTest {
 
     @Test
-    void deleteProjectsTasksShouldReturn200or204() {
+    void deleteProjectsTasksShouldReturn200or204or404() {
         given()
             .accept(ContentType.JSON)
         .when()

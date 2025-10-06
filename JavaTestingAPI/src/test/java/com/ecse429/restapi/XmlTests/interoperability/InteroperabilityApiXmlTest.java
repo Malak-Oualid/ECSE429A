@@ -13,6 +13,7 @@ import static org.hamcrest.Matchers.hasItem;
 
 import com.ecse429.restapi.BaseApiTest;
 
+@TestMethodOrder(org.junit.jupiter.api.MethodOrderer.Random.class)
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 public class InteroperabilityApiXmlTest extends BaseApiTest {
 
@@ -25,7 +26,7 @@ public class InteroperabilityApiXmlTest extends BaseApiTest {
     private static final String[] PROJECT_ID_PATHS  = {"project.id", "projects.project.id", "item.id"};
     private static final String[] CATEGORY_ID_PATHS = {"category.id", "categories.category.id", "item.id"};
 
-    // --- helpers (put anywhere in the class) ---
+    // --- helpers---
     private static java.util.List<String> getIdsFromResponse(io.restassured.response.Response resp, String... paths) {
         io.restassured.path.xml.XmlPath xp = new io.restassured.path.xml.XmlPath(resp.asString());
         java.util.List<String> out = new java.util.ArrayList<>();
@@ -89,35 +90,7 @@ public class InteroperabilityApiXmlTest extends BaseApiTest {
         given().when().delete(path).then().statusCode(anyOf(is(200), is(204), is(404)));
     }
 
-    /**
-     * Try posting a relation with a specific wrapper (<tag><id>..</id></tag>),
-     * and if the server rejects it (404/400/415), retry with <item><id>..</id></item>.
-     */
-    private void postRelationXml(String path, String resourceTag, String id) {
-        String primary = "<" + resourceTag + "><id>" + id + "</id></" + resourceTag + ">";
-        Response r = given()
-                .contentType(ContentType.XML).accept(ContentType.XML)
-                .body(primary).log().all()
-            .when()
-                .post(path)
-            .then()
-                .log().all()
-                .extract().response();
-
-        int sc = r.statusCode();
-        if (sc == 200 || sc == 201) return;
-
-        // Retry with <item>
-        String fallback = "<item><id>" + id + "</id></item>";
-        given()
-            .contentType(ContentType.XML).accept(ContentType.XML)
-            .body(fallback).log().all()
-        .when()
-            .post(path)
-        .then()
-            .log().all()
-            .statusCode(anyOf(is(200), is(201)));
-    }
+  
 
     @BeforeAll
     void createSharedEntities() {
@@ -206,8 +179,7 @@ public class InteroperabilityApiXmlTest extends BaseApiTest {
         var projectIds = getIdsFromResponse(
             todoTasksofResp,
             "todos.projects.project.id",
-            "projects.project.id",
-            "todos.project.id"
+            "projects.project.id"
         );
         Assertions.assertTrue(projectIds.contains(projectId),
             "Expected projectId " + projectId + " in todo tasksof, got: " + projectIds + "\nXML:\n" + todoTasksofResp.asString());
@@ -240,12 +212,8 @@ public class InteroperabilityApiXmlTest extends BaseApiTest {
         var projTasksResp = getWithRetry("/projects/" + projectId + "/tasks", 4, 150);
         var todoIds = getIdsFromResponse(
             projTasksResp,
-            // common shapes:
             "projects.todos.todo.id",
-            "todos.todo.id",
-            // fallbacks:
-            "projects.todos.id",    // some builds flatten 'todo'
-            "todo.id"
+            "todos.todo.id"
         );
         Assertions.assertTrue(
             todoIds.contains(todoId),
@@ -341,10 +309,10 @@ public class InteroperabilityApiXmlTest extends BaseApiTest {
             TODO_ID_PATHS
         );
 
-        given().accept(ContentType.XML)
-        .when().get("/todos?doneStatus=true")
-        .then().statusCode(200)
-               .body("todos.todo.id", hasItem(doneTodoId));
+     given().accept(ContentType.XML)
+     .when().get("/todos?doneStatus=true")
+     .then().statusCode(200)
+         .body("todos.todo.id", hasItem(doneTodoId));
 
         given().accept(ContentType.XML)
         .when().get("/projects?active=true")

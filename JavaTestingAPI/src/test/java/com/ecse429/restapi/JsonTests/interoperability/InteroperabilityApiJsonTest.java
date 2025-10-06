@@ -10,6 +10,7 @@ import static org.hamcrest.CoreMatchers.is;
 
 import com.ecse429.restapi.BaseApiTest;
 
+@TestMethodOrder(org.junit.jupiter.api.MethodOrderer.Random.class)
 @TestInstance(TestInstance.Lifecycle.PER_CLASS) // allow non-static @BeforeAll/@AfterAll
 public class InteroperabilityApiJsonTest extends BaseApiTest {
 

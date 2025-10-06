@@ -262,7 +262,35 @@ public class InteroperabilityApiXmlTest extends BaseApiTest {
     
     @Test
     void categorySideMirrors_TodosAndProjects() {
+        // Create unique resources for this test
+        String unique = String.valueOf(System.currentTimeMillis());
+        String todoId = given()
+            .contentType(ContentType.XML)
+            .accept(ContentType.XML)
+            .body("<todo><title>catMirrorTodo" + unique + "</title><doneStatus>false</doneStatus></todo>")
+        .when().post("/todos")
+        .then().statusCode(anyOf(is(200), is(201)))
+        .extract().path("todo.id");
+
+        String projectId = given()
+            .contentType(ContentType.XML)
+            .accept(ContentType.XML)
+            .body("<project><title>catMirrorProject" + unique + "</title><completed>false</completed><active>true</active></project>")
+        .when().post("/projects")
+        .then().statusCode(anyOf(is(200), is(201)))
+        .extract().path("project.id");
+
+        String categoryId = given()
+            .contentType(ContentType.XML)
+            .accept(ContentType.XML)
+            .body("<category><title>catMirrorCategory" + unique + "</title></category>")
+        .when().post("/categories")
+        .then().statusCode(anyOf(is(200), is(201)))
+        .extract().path("category.id");
+
+        // Link category -> todo
         postRelationJson("/categories/" + categoryId + "/todos", todoId);
+        // Link category -> project
         postRelationJson("/categories/" + categoryId + "/projects", projectId);
 
         // Accept both single-value and list responses
@@ -275,6 +303,11 @@ public class InteroperabilityApiXmlTest extends BaseApiTest {
         .when().get("/categories/" + categoryId + "/projects")
         .then().statusCode(200)
             .body("projects.project.id", anyOf(equalTo(projectId), hasItem(projectId)));
+
+        // Cleanup (best-effort)
+        try { given().when().delete("/todos/" + todoId); } catch (Exception ignored) {}
+        try { given().when().delete("/projects/" + projectId); } catch (Exception ignored) {}
+        try { given().when().delete("/categories/" + categoryId); } catch (Exception ignored) {}
     }
 
     @Test
@@ -312,7 +345,7 @@ public class InteroperabilityApiXmlTest extends BaseApiTest {
      given().accept(ContentType.XML)
      .when().get("/todos?doneStatus=true")
      .then().statusCode(200)
-         .body("todos.todo.id", hasItem(doneTodoId));
+         .body("todos.todo.id", anyOf(equalTo(doneTodoId), hasItem(doneTodoId)));
 
         given().accept(ContentType.XML)
         .when().get("/projects?active=true")

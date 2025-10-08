@@ -155,14 +155,10 @@ After running tests, view results in:
 - Console output for immediate feedback
 - `target/surefire-reports/` for detailed HTML/XML reports
 
-## Contributing
-
-When adding new tests:
-1. Extend `BaseApiTest` class for configuration
-2. Follow existing naming conventions
-3. Use `@TestMethodOrder` and `@Order` for test sequencing
-4. Include both positive and negative test cases
-5. Clean up test data when needed
+## Contribution
+| Jason Shao | Malak Oualid | Natasha Lawford | Joseph Feghaly |
+|-----------|-----------|-----------|-----------|
+| Category Unit test and script | Todo Unit test and script | Project Unit test and script | Interoperability Unit test and script |
 
 ## License
 

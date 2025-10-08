@@ -77,42 +77,6 @@ mvn test -Dtest=CategoriesApiTest#testCreateCategory
 mvn test -Dtest=CategoriesApiTest#testCreateCategory+testGetCategoryById
 ```
 
-## Test Suites Overview
-
-### CategoriesApiTest (JSON)
-Basic CRUD operations testing:
-- ✅ GET /categories - List all categories
-- ✅ HEAD /categories - Check endpoint availability  
-- ✅ POST /categories - Create new category
-- ✅ GET /categories/{id} - Get specific category
-- ✅ HEAD /categories/{id} - Check specific category
-- ✅ POST /categories/{id} - Update category
-- ✅ PUT /categories/{id} - Replace category  
-- ✅ DELETE /categories/{id} - Delete category
-- ✅ Verify 404 for deleted resources
-
-### CategoriesApiExpectedBehaviorTest (JSON)
-Comprehensive behavior and edge case testing:
-- ✅ All CRUD operations with validation
-- ✅ Error handling scenarios
-- ✅ Malformed requests
-- ✅ Data integrity checks
-- ✅ Boundary conditions
-
-### CategoriesApiXmlTest (XML)
-XML format testing:
-- ✅ All CRUD operations using XML payloads
-- ✅ XML response validation
-- ✅ Content-Type handling for XML
-
-## Dependencies
-
-The project uses:
-- **JUnit 5 (Jupiter)** - Version 5.10.0 - Testing framework
-- **RestAssured** - Version 5.3.2 - HTTP client for testing REST APIs
-- **Hamcrest** - Version 2.2 - Matchers for assertions
-- **Gson** - Version 2.10.1 - JSON processing
-
 ## Troubleshooting
 
 ### API Server Not Running
@@ -138,22 +102,6 @@ If port 4567 is in use, modify `BaseApiTest.java`:
 ```java
 protected static final int PORT = 4567; // Change to available port
 ```
-
-### Build Issues
-```bash
-# Verify Java and Maven versions
-java -version  # Should be Java 11+
-mvn -version   # Should be Maven 3.6+
-
-# Clean and rebuild
-mvn clean compile test-compile
-```
-
-## Test Reports
-
-After running tests, view results in:
-- Console output for immediate feedback
-- `target/surefire-reports/` for detailed HTML/XML reports
 
 ## Contribution
 | Jason Shao | Malak Oualid | Natasha Lawford | Joseph Feghaly |

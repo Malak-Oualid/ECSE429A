@@ -77,32 +77,6 @@ mvn test -Dtest=CategoriesApiTest#testCreateCategory
 mvn test -Dtest=CategoriesApiTest#testCreateCategory+testGetCategoryById
 ```
 
-## Troubleshooting
-
-### API Server Not Running
-```bash
-# Check if server is running
-curl http://localhost:4567/categories
-
-# If not running, start the server first
-# (Server should be provided separately)
-```
-
-### Test Failures
-```bash
-# Run with verbose output for debugging
-mvn test -X
-
-# Run individual test to isolate issues
-mvn test -Dtest=CategoriesApiTest#testGetAllCategories
-```
-
-### Port Issues
-If port 4567 is in use, modify `BaseApiTest.java`:
-```java
-protected static final int PORT = 4567; // Change to available port
-```
-
 ## Contribution
 | Jason Shao | Malak Oualid | Natasha Lawford | Joseph Feghaly |
 |-----------|-----------|-----------|-----------|

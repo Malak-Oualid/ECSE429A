@@ -78,7 +78,7 @@ mvn test -Dtest=CategoriesApiTest#testCreateCategory+testGetCategoryById
 ```
 
 ## Contribution
-| Jason Shao | Malak Oualid | Natasha Lawford | Joseph Feghaly |
+| Jason Shao | Malak Oualid | Natasha Lawford | Joseph Rouhana Feghaly |
 |-----------|-----------|-----------|-----------|
 | Category Unit test and script | Todo Unit test and script | Project Unit test and script | Interoperability Unit test and script |
 
